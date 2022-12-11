@@ -22,7 +22,7 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         navigationItem.titleView = UIImageView(image: #imageLiteral(resourceName: "toolbar-cow"))
         navigationItem.rightBarButtonItem = editButtonItem
         let fetchRequest:NSFetchRequest<Notebook> = Notebook.fetchRequest()
-        let sortDescriptor = NSSortDescriptor(key: "CreationDate", ascending: false)
+        let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
         if let result = try? dataController.viewContext.fetch(fetchRequest){
             notebooks = result
@@ -100,6 +100,9 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
 
     /// Deletes the notebook at the specified index path
     func deleteNotebook(at indexPath: IndexPath) {
+        let notebookToDelete = notebook(at: indexPath)
+        dataController.viewContext.delete(notebookToDelete)
+        try? dataController.viewContext.save()
         notebooks.remove(at: indexPath.row)
         tableView.deleteRows(at: [indexPath], with: .fade)
         if numberOfNotebooks == 0 {
@@ -166,6 +169,7 @@ class NotebooksListViewController: UIViewController, UITableViewDataSource {
         if let vc = segue.destination as? NotesListViewController {
             if let indexPath = tableView.indexPathForSelectedRow {
                 vc.notebook = notebook(at: indexPath)
+                vc.dataController = dataController
             }
         }
     }
